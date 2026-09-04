@@ -32,7 +32,9 @@ sources = [
 function get_script(; platform::Platform)
     if arch(platform) == "x86_64" && haskey(platform, "march")
         blasfeo_target, hpipm_target = if platform["march"] == "avx"
-            "X64_INTEL_SANDY_BRIDGE", "AVX"
+            # BLASFEO's Sandy Bridge target misses single-precision kernels under MinGW (undefined
+            # kernel_sgemm_nt_16x4_lib8), so Windows gets the generic kernels there
+            Sys.iswindows(platform) ? "GENERIC" : "X64_INTEL_SANDY_BRIDGE", "AVX"
         elseif platform["march"] in ("avx2", "avx512")
             "X64_INTEL_HASWELL", "AVX"
         else
